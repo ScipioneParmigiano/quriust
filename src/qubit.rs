@@ -27,23 +27,7 @@ impl Qubit {
             beta: Complex::new(1.0, 0.0),
         }
     }
-
-    // Apply Hadamard gate to the qubit
-    pub fn apply_hadamard_gate(&mut self) {
-        let sqrt2_inv = 1.0 / 2.0_f64.sqrt();
-        let hadamard_matrix = [
-            [Complex::new(sqrt2_inv, 0.0), Complex::new(sqrt2_inv, 0.0)],
-            [Complex::new(sqrt2_inv, 0.0), Complex::new(-sqrt2_inv, 0.0)],
-        ];
-
-        let alpha_old = self.alpha;
-        let beta_old = self.beta;
-
-        self.alpha = hadamard_matrix[0][0] * alpha_old + hadamard_matrix[0][1] * beta_old;
-        self.beta = hadamard_matrix[1][0] * alpha_old + hadamard_matrix[1][1] * beta_old;
-    }
-
-    
+  
     // Pauli-X gate (NOT gate)
     pub fn pauli_x_gate(&mut self) {
         let pauli_x_matrix = [
@@ -137,17 +121,139 @@ impl Qubit {
     
     // Measure the qubit to collapse it into |0⟩ or |1⟩ state probabilistically
     pub fn measure(&mut self) -> bool {
-        let rand_num: f64 = rand::random();
-    
         let prob_0 = self.alpha.norm_sqr();
-        if rand_num < prob_0 {
+        let rand_num: f64 = rand::random(); // Generate a random number between 0 and 1
+
+        // Perform the measurement probabilistically based on the probability amplitudes
+        let measurement_result = rand_num < prob_0;
+
+        // Collapse the qubit state based on the measurement result
+        if measurement_result {
             self.alpha = Complex::new(1.0, 0.0);
             self.beta = Complex::new(0.0, 0.0);
-            true // Measured |0⟩
         } else {
             self.alpha = Complex::new(0.0, 0.0);
             self.beta = Complex::new(1.0, 0.0);
-            false // Measured |1⟩
         }
+
+        measurement_result
+    }
+}
+
+
+#[test]
+fn test_hadamard_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.hadamard_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.7071067811865475, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.7071067811865475, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.hadamard_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.7071067811865475, 0.0));
+    assert_eq!(qubit.beta, Complex::new(-0.7071067811865475, 0.0));
+}
+
+#[test]
+fn test_pauli_x_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.pauli_x_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(1.0, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.pauli_x_gate();
+    assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+}
+
+#[test]
+fn test_pauli_y_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.pauli_y_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 1.0));
+
+    let mut qubit = Qubit::one();
+    qubit.pauli_y_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, -1.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+}
+
+#[test]
+fn test_pauli_z_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.pauli_z_gate();
+    assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.pauli_z_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(-1.0, 0.0));
+}
+
+#[test]
+fn test_s_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.s_gate();
+    assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.s_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 1.0));
+}
+
+#[test]
+fn test_s_conjugate_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.s_conjugate_gate();
+    assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.s_conjugate_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, -1.0));
+}
+
+#[test]
+fn test_t_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.t_gate();
+    assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.t_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.70710678118, 0.70710678118));
+}
+
+#[test]
+fn test_t_conjugate_gate() {
+    let mut qubit = Qubit::zero();
+    qubit.t_conjugate_gate();
+    assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+
+    let mut qubit = Qubit::one();
+    qubit.t_conjugate_gate();
+    assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+    assert_eq!(qubit.beta, Complex::new(0.70710678118, -0.70710678118));
+}
+
+#[test]
+fn test_measure() {
+    let mut qubit = Qubit::zero();
+    let result = qubit.measure();
+    if result {
+        assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+        assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+    } else {
+        assert_eq!(qubit.alpha, Complex::new(0.0, 0.0));
+        assert_eq!(qubit.beta, Complex::new(1.0, 0.0));
     }
 }
