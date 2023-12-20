@@ -118,6 +118,19 @@ impl Qubit {
         self.alpha = gate_matrix[0][0] * alpha_old + gate_matrix[0][1] * beta_old;
         self.beta = gate_matrix[1][0] * alpha_old + gate_matrix[1][1] * beta_old;
     }
+
+    pub fn cnot(&mut self, control: usize, target: usize) {
+        let control_state = if control == 0 { self.alpha } else { self.beta };
+        if control_state == Complex::new(0.0, 0.0) {
+            return;
+        }
+        if control == 0 {
+            self.pauli_x_gate();
+        }
+        if target == 1 {
+            self.hadamard_gate();
+        }
+    }
     
     // Measure the qubit to collapse it into |0⟩ or |1⟩ state probabilistically
     pub fn measure(&mut self) -> bool {
