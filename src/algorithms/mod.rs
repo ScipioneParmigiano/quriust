@@ -1,1 +1,2 @@
-pub mod ds;
+pub mod deutsch;
+pub mod quantum_teleportation;

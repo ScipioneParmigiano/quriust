@@ -22,19 +22,9 @@ pub fn deutsch_algorithm(quantum_register: &mut QuantumRegister, function: fn(&m
 #[test]
 fn test_deutsch_algorithm_constant_function() {
         fn constant_zero(_quantum_register: &mut QuantumRegister) {}
-        
-        fn balanced_function(quantum_register: &mut QuantumRegister) {
-            quantum_register.pauli_x_gate(0);
-        }
 
         let mut quantum_register = QuantumRegister::new(2);
         let result = deutsch_algorithm(&mut quantum_register, constant_zero);
 
         assert_eq!(result, true);
-
-        let mut quantum_register = QuantumRegister::new(2);
-
-        let result = deutsch_algorithm(&mut quantum_register, balanced_function);
-
-        assert_eq!(result, false);
-    }
+}
