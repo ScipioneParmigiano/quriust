@@ -5,7 +5,7 @@ version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/ScipioneParmigiano/quriust"
 license = "MIT" 
-keywords = ["quantum-computing", "quantum-simulations"]
+keywords = ["quantum-computing", "quantum-simulation"]
 readme = "README.md"
 
 
