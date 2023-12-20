@@ -53,15 +53,20 @@ impl QuantumRegister {
     }
 
     pub fn cnot(&mut self, control: usize, target: usize) {
+
+        if control >= self.qubits.len() || target >= self.qubits.len() {
+            panic!("Invalid qubit indices for CNOT gate!");
+        }
+        
         // Apply CNOT gate: Flipping target qubit if control qubit is |1⟩
         let control_state = self.qubits[control].alpha;
         if control_state == Complex::new(0.0, 0.0) {
             // If control qubit is |0⟩, do nothing
             return;
+        } else {
+            // Apply NOT operation (X gate) to the target qubit
+            self.qubits[target].pauli_x_gate();
         }
-
-        // Apply NOT operation (X gate) to the target qubit
-        self.qubits[target].pauli_x_gate();
     }
 
     pub fn swap(&mut self, qubit1: usize, qubit2: usize) {

@@ -125,7 +125,7 @@ impl Qubit {
         let rand_num: f64 = rand::random(); // Generate a random number between 0 and 1
 
         // Perform the measurement probabilistically based on the probability amplitudes
-        let measurement_result = rand_num < prob_0;
+        let measurement_result = rand_num <= prob_0;
 
         // Collapse the qubit state based on the measurement result
         if measurement_result {
