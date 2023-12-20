@@ -1,7 +1,13 @@
 [package]
 name = "quriust"
+author = ["Pietro Zanotta", "<pcs.parmigiano@gmail.com>"]
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/ScipioneParmigiano/quriust"
+license = "MIT" 
+keywords = ["quantum-computing", "quantum-simulations"]
+readme = "README.md"
+
 
 [dependencies]
 num-complex = "0.4.4"
