@@ -7,6 +7,7 @@ repository = "https://github.com/ScipioneParmigiano/quriust"
 license = "MIT" 
 keywords = ["quantum-computing", "quantum-simulation"]
 readme = "README.md"
+description = "A Rust library to simulate a quantum computer. Only for quriust ones."
 
 
 [dependencies]
