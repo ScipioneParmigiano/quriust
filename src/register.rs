@@ -1,4 +1,4 @@
-use num_complex::Complex; // Import the `num_complex` crate for complex numbers
+use num_complex::Complex;
 use super::qubit::*;
 
 #[derive(Debug, Clone)]
@@ -16,8 +16,8 @@ impl QuantumRegister {
         QuantumRegister { qubits }
     }
 
-    pub fn apply_hadamard_gate(&mut self, qubit_index: usize) {
-        self.qubits[qubit_index].apply_hadamard_gate();
+    pub fn hadamard_gate(&mut self, qubit_index: usize) {
+        self.qubits[qubit_index].hadamard_gate();
     }
 
     pub fn pauli_x_gate(&mut self, qubit_index: usize) {
@@ -56,12 +56,11 @@ impl QuantumRegister {
         // Apply CNOT gate: Flipping target qubit if control qubit is |1⟩
         let control_state = self.qubits[control].alpha;
         if control_state == Complex::new(0.0, 0.0) {
-            // If control qubit is |0⟩, do nothing (CNOT is a controlled operation)
+            // If control qubit is |0⟩, do nothing
             return;
         }
 
         // Apply NOT operation (X gate) to the target qubit
-        // (Assuming you have defined a method to apply X gate on Qubit)
         self.qubits[target].pauli_x_gate();
     }
 
@@ -76,12 +75,11 @@ impl QuantumRegister {
         let control1_state = self.qubits[control1].alpha;
         let control2_state = self.qubits[control2].alpha;
         if control1_state == Complex::new(0.0, 0.0) || control2_state == Complex::new(0.0, 0.0) {
-            // If either control qubit is |0⟩, do nothing (Toffoli is a controlled operation)
+            // If either control qubit is |0⟩, do nothing
             return;
         }
 
         // Apply NOT operation (X gate) to the target qubit
-        // (Assuming you have defined a method to apply X gate on Qubit)
         self.qubits[target].pauli_x_gate();
     }
 
@@ -93,4 +91,57 @@ impl QuantumRegister {
         }
         measurement_results
     }
+}
+
+
+#[test]
+fn test_quantum_register_creation() {
+    let num_qubits = 10;
+    let quantum_register = QuantumRegister::new(num_qubits);
+
+    assert_eq!(quantum_register.qubits.len(), num_qubits);
+    for qubit in &quantum_register.qubits {
+        assert_eq!(qubit.alpha, Complex::new(1.0, 0.0));
+        assert_eq!(qubit.beta, Complex::new(0.0, 0.0));
+    }
+}
+
+#[test]
+fn test_hadamard_gate_on_register() {
+    let mut quantum_register = QuantumRegister::new(3);
+    quantum_register.hadamard_gate(1);
+
+    assert_eq!(quantum_register.qubits[1].alpha, Complex::new(0.7071067811865475, 0.0));
+    assert_eq!(quantum_register.qubits[1].beta, Complex::new(0.7071067811865475, 0.0));
+}
+
+#[test]
+fn test_cnot_operation() {
+    let mut quantum_register = QuantumRegister::new(3);
+
+    quantum_register.qubits[0].alpha = Complex::new(0.0, 0.0); // Set control qubit to |1⟩
+    quantum_register.cnot(0, 1);
+
+    assert_eq!(quantum_register.qubits[1].alpha, Complex::new(1.0, 0.0));
+    assert_eq!(quantum_register.qubits[1].beta, Complex::new(0.0, 0.0));
+}
+
+#[test]
+fn test_toffoli_operation() {
+let mut quantum_register = QuantumRegister::new(3);
+
+quantum_register.qubits[0].alpha = Complex::new(0.0, 0.0);
+quantum_register.qubits[1].alpha = Complex::new(0.0, 0.0);
+quantum_register.toffoli(0, 1, 2);
+
+assert_eq!(quantum_register.qubits[2].alpha, Complex::new(1.0, 0.0));
+assert_eq!(quantum_register.qubits[2].beta, Complex::new(0.0, 0.0));
+}
+
+#[test]
+fn test_measurement_of_register() {
+    let mut quantum_register = QuantumRegister::new(12);
+    let measurement_results = quantum_register.measure_all();
+
+    assert_eq!(measurement_results.len(), 12);
 }
