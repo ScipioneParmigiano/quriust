@@ -149,6 +149,9 @@ impl Qubit {
             self.beta = Complex::new(1.0, 0.0);
         }
 
+        println!("After measurement: Alpha: {:?}, Beta: {:?}", self.alpha, self.beta);
+
+
         measurement_result
     }
 }
