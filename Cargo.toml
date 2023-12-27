@@ -11,5 +11,6 @@ description = "A Rust library to simulate a quantum computer. Only for quriust o
 
 
 [dependencies]
+nalgebra = "0.32.3"
 num-complex = "0.4.4"
 rand = "0.8.5"
