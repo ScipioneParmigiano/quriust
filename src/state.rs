@@ -61,7 +61,9 @@ impl State{
     
         let pauli_z_matrix = DMatrix::<Complex<f64>>::from_row_slice(2, 2, &matr);
         self.apply_gate(pauli_z_matrix);
-    }    
+    }   
+    
+     
 
     fn apply_gate(&mut self, gate: DMatrix<Complex<f64>>){
         let new_amplitudes = gate * DVector::<Complex<f64>>::from_iterator(self.amplitudes.len(), self.amplitudes.clone().into_iter());
@@ -70,32 +72,62 @@ impl State{
 }
 
 #[test]
-fn pauli_x_test() {
-        
-    // |1> goes to |0> i.e. 00
-    let cr = ClassicalRegister::new(vec![0,1]);
-    let mut qr: QuantumRegister = QuantumRegister::new(&cr);
-    qr.x();
-    let measured_qr = qr.measure();
-
-    assert_eq!(measured_qr,ClassicalRegister::new(vec![0,0]));
-
-
+fn pauli_x_test() {  
     // |0> goes to |1>, i.e. 01
     let cr = ClassicalRegister::new(vec![0,0]);
     let mut qr: QuantumRegister = QuantumRegister::new(&cr);
     qr.x();
+    let qr_state = qr.state();
+    let measured_qr = qr.measure();
+    
+    assert_eq!(qr_state, vec![Complex{re: 0.0, im: 0.0}, Complex{re: 1.0, im: 0.0}]);
+    assert_eq!(measured_qr,ClassicalRegister::new(vec![0,1]));
+
+    // |1> goes to |0> i.e. 00
+    let cr = ClassicalRegister::new(vec![0,1]);
+    let mut qr: QuantumRegister = QuantumRegister::new(&cr);
+    qr.x();
+    let qr_state = qr.state();
     let measured_qr = qr.measure();
 
-    assert_eq!(measured_qr,ClassicalRegister::new(vec![0,1]));
+    assert_eq!(qr_state, vec![Complex{re: 1.0, im: 0.0}, Complex{re: 0.0, im: 0.0}]);
+    assert_eq!(measured_qr,ClassicalRegister::new(vec![0,0]));
 }
 
 #[test]
 fn pauli_y_test() {
-        
+    // |0> goes to i|1>
+    let cr = ClassicalRegister::new(vec![0,0]);
+    let mut qr: QuantumRegister = QuantumRegister::new(&cr);
+    qr.y();
+    let qr_state = qr.state();
+
+    assert_eq!(qr_state, vec![Complex{re: 0.0, im: 0.0}, Complex{re: 0.0, im: 1.0}]);
+
+    // |1> goes to -i|0>
+    let cr = ClassicalRegister::new(vec![0,1]);
+    let mut qr: QuantumRegister = QuantumRegister::new(&cr);
+    qr.y();
+    let qr_state = qr.state();
+
+    assert_eq!(qr_state, vec![Complex{re: 0.0, im: -1.0}, Complex{re: 0.0, im: 0.0}]);
 }
 
 #[test]
 fn pauli_z_test() {
-        
+    // |0> goes to |0>
+    let cr = ClassicalRegister::new(vec![0,0]);
+    let mut qr: QuantumRegister = QuantumRegister::new(&cr);
+    qr.z();
+    let qr_state = qr.state();
+
+    assert_eq!(qr_state, vec![Complex{re: 1.0, im: 0.0}, Complex{re: 0.0, im: 0.0}]);
+
+    // |1> goes to -|1>
+    let cr = ClassicalRegister::new(vec![0,1]);
+    let mut qr: QuantumRegister = QuantumRegister::new(&cr);
+    qr.z();
+    let qr_state = qr.state();
+
+    assert_eq!(qr_state, vec![Complex{re: 0.0, im: 0.0}, Complex{re: -1.0, im: 0.0}]);
 }

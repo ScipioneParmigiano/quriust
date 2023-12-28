@@ -1,4 +1,5 @@
 use super::state::State;
+use num_complex::Complex;
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct ClassicalRegister{
@@ -124,8 +125,8 @@ impl QuantumRegister {
         ClassicalRegister::from_value(self.len, 0)
     }
 
-    pub fn state(&self)->State{
-        self.prob_amplitudes.clone()
+    pub fn state(&self)-> Vec<Complex<f64>> {
+        self.prob_amplitudes.amplitudes()
     }
 
     pub fn x(&mut self) {
