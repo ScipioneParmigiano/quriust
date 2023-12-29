@@ -61,9 +61,22 @@ impl State{
     
         let pauli_z_matrix = DMatrix::<Complex<f64>>::from_row_slice(2, 2, &matr);
         self.apply_gate(pauli_z_matrix);
-    }   
+    }  
+
+    pub fn hadamard_gate(&mut self) {
+
+        let q = 1.0/(2.0 as f64).sqrt();
+
+        let matr = vec![
+            Complex::new(q, 0.0),
+            Complex::new(q, 0.0),
+            Complex::new(q, 0.0),
+            Complex::new(-q, 0.0),
+        ];
     
-     
+        let pauli_z_matrix = DMatrix::<Complex<f64>>::from_row_slice(2, 2, &matr);
+        self.apply_gate(pauli_z_matrix);
+    }    
 
     fn apply_gate(&mut self, gate: DMatrix<Complex<f64>>){
         let new_amplitudes = gate * DVector::<Complex<f64>>::from_iterator(self.amplitudes.len(), self.amplitudes.clone().into_iter());
@@ -130,4 +143,22 @@ fn pauli_z_test() {
     let qr_state = qr.state();
 
     assert_eq!(qr_state, vec![Complex{re: 0.0, im: 0.0}, Complex{re: -1.0, im: 0.0}]);
+}
+
+
+#[test]
+fn hadamard_test() {
+    let q = 1.0/(2.0 as f64).sqrt();
+
+    let cr1 = ClassicalRegister::new(vec![0,0]);
+    let cr2 = ClassicalRegister::new(vec![0,1]);
+    let mut qr1: QuantumRegister = QuantumRegister::new(&cr1);
+    let mut qr2: QuantumRegister = QuantumRegister::new(&cr2);
+    qr1.h();
+    qr2.h();
+    let qr1_state = qr1.state();
+    let qr2_state = qr2.state();
+
+    assert_eq!(qr1_state, vec![Complex{re: q, im: 0.0}, Complex{re: q, im: 0.0}]);
+    assert_eq!(qr2_state, vec![Complex{re: q, im: 0.0}, Complex{re: -q, im: 0.0}]);
 }

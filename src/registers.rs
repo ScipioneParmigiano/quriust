@@ -144,6 +144,10 @@ impl QuantumRegister {
         self.prob_amplitudes.pauli_z_gate();
     }
 
+    pub fn h(&mut self) {
+        assert_eq!(false, self.measured);
+        self.prob_amplitudes.hadamard_gate();
+    }
 }
 
 
