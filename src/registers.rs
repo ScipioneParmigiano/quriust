@@ -99,6 +99,10 @@ impl QuantumRegister {
         self.len
     }
 
+    pub fn get_qubit_count(&self) -> usize {
+        (self.len() as f64).log2() as usize
+    }
+
     pub fn measure(&mut self) -> ClassicalRegister {
         assert_eq!(false, self.measured);
         self.measured = true;
@@ -129,24 +133,25 @@ impl QuantumRegister {
         self.prob_amplitudes.amplitudes()
     }
 
-    pub fn x(&mut self) {
+    pub fn x(&mut self, target_qubit: usize) {
         assert_eq!(false, self.measured);
-        self.prob_amplitudes.pauli_x_gate();
+        self.prob_amplitudes.pauli_x_gate(target_qubit);
     }
 
-    pub fn y(&mut self) {
+    pub fn y(&mut self, target_qubit: usize) {
         assert_eq!(false, self.measured);
-        self.prob_amplitudes.pauli_y_gate();
+        self.prob_amplitudes.pauli_y_gate(target_qubit);
     }
 
-    pub fn z(&mut self) {
+    pub fn z(&mut self, target_qubit: usize) {
         assert_eq!(false, self.measured);
-        self.prob_amplitudes.pauli_z_gate();
+        self.prob_amplitudes.pauli_z_gate(target_qubit);
     }
 
-    pub fn h(&mut self) {
+    pub fn h(&mut self, target_qubit: usize) {
+        println!{"#"};
         assert_eq!(false, self.measured);
-        self.prob_amplitudes.hadamard_gate();
+        self.prob_amplitudes.hadamard_gate(target_qubit);
     }
 }
 
