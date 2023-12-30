@@ -1,22 +1,23 @@
-use super::super::register;
-use register::*;
+use super::super::registers;
+use registers::*;
 
-pub fn deutsch_algorithm(quantum_register: &mut QuantumRegister, function: fn(&mut QuantumRegister)) -> bool {
+pub fn deutsch_algorithm(q: &mut QuantumRegister, function: fn(&mut QuantumRegister)) -> bool {
     // Apply Hadamard gate to qubits 0 and 1
-    quantum_register.hadamard_gate(0);
-    quantum_register.hadamard_gate(1);
+    println!("{}",q.len());
+    for i in 1..q.len()-1{
+        println!("run: {}", i);
+        q.h(i);
+    }
 
     // Apply the function on the quantum state
-    function(quantum_register);
+    function(q);
 
     // Apply Hadamard gate to the first qubit
-    quantum_register.hadamard_gate(0);
+    q.h(1);
 
     // Measure the first qubit to determine the function's nature (constant or balanced)
-    let measurement_result = quantum_register.qubits[0].measure();
-
-    // True for constant function, false otherwise
-    measurement_result
+    let is_one = q.measure_qubit(0);
+    !is_one
 }
 
 
@@ -24,8 +25,8 @@ pub fn deutsch_algorithm(quantum_register: &mut QuantumRegister, function: fn(&m
 fn test_deutsch_algorithm_constant_function() {
     fn constant_function(_q: &mut QuantumRegister) {}
     
-    let mut quantum_register = QuantumRegister::new(2);
-    let is_constant = deutsch_algorithm(&mut quantum_register, constant_function);
+    let mut q = QuantumRegister::init(6);
+    let is_constant = deutsch_algorithm(&mut q, constant_function);
     
     assert!(is_constant);
 }
@@ -33,11 +34,11 @@ fn test_deutsch_algorithm_constant_function() {
 #[test]
 fn test_deutsch_algorithm_balanced_function() {
     fn balanced_function(q: &mut QuantumRegister) {
-        q.pauli_z_gate(0);
+        q.z(1);
     }
     
-    let mut quantum_register = QuantumRegister::new(2);
-    let is_constant = deutsch_algorithm(&mut quantum_register, balanced_function);
-
+    let mut q = QuantumRegister::init(4);
+    let is_constant = deutsch_algorithm(&mut q, balanced_function);
+    
     assert!(!is_constant);
 }

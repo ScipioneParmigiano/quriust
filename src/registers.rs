@@ -24,19 +24,6 @@ impl ClassicalRegister{
         let mut bits = Vec::new();
         let mut remaining_value = value;
 
-        // for i in 0..width {
-        //     let pos: u32 = (width - i - 1) as u32;
-        //     let value = (2 as u32).pow(pos);
-
-        //     // Insert a one or a zero at the front of the vector.
-        //     if value <= remaining_value {
-        //         remaining_value -= value;
-        //         bits.insert(0, 1);
-        //     } else {
-        //         bits.insert(0, 0);
-        //     }
-        // }
-
         for i in (0..width).rev() {
             let pos: u32 = i as u32;
             let bit_value = (2 as u32).pow(pos);
@@ -53,18 +40,6 @@ impl ClassicalRegister{
         ClassicalRegister::new(bits)
     }
 
-    // pub fn value(&self) -> u32 {
-    //     let mut value = 0 as u32;
-
-    //     for (pos, bit) in self.bits.iter().enumerate() {
-    //         if 0 != *bit {
-    //             value += (2 as u32).pow(pos as u32);
-    //         }
-    //     }
-
-    //     value
-    // }
-
     pub fn value(&self) -> u32 {
         let mut value = 0 as u32;
     
@@ -75,6 +50,10 @@ impl ClassicalRegister{
         }
     
         value
+    }
+
+    pub fn bits(&self) -> Vec<usize>{
+        self.bits.clone()
     }
 
 }
@@ -95,6 +74,15 @@ impl QuantumRegister {
         }
     }
 
+    pub fn init(n_qubit: usize) -> QuantumRegister{
+        let cr = &ClassicalRegister::new(vec![0; 2_i32.pow(n_qubit as u32) as usize]);
+        QuantumRegister {
+            measured: false,
+            prob_amplitudes: State::from_cr(cr),
+            len: (cr.len()as f32).log2() as usize,
+        }
+    }
+
     pub fn len(&self) -> usize{
         self.len
     }
@@ -110,8 +98,6 @@ impl QuantumRegister {
         let mut cum = 0.0;
         let rand_num: f64 = rand::random();
 
-        // println!{"agdgadu1"};
-
         for (val, coefficient) in self.prob_amplitudes.amplitudes().iter().enumerate() {
             let scaled_prob = coefficient.norm_sqr();
             cum += scaled_prob;
@@ -123,8 +109,6 @@ impl QuantumRegister {
             }
 
         }
-
-        // println!{"agdgadu2"};
 
         ClassicalRegister::from_value(self.len, 0)
     }
@@ -149,9 +133,36 @@ impl QuantumRegister {
     }
 
     pub fn h(&mut self, target_qubit: usize) {
-        println!{"#"};
         assert_eq!(false, self.measured);
         self.prob_amplitudes.hadamard_gate(target_qubit);
+    }
+
+    pub fn measure_qubit(&mut self, nth_qubit: usize) -> bool {
+        assert_eq!(false, self.measured);
+
+        let qubit_count = self.get_qubit_count();
+        assert!(qubit_count > nth_qubit);
+
+        let mut cumulative_prob = 0.0;
+        let rand_num: f64 = rand::random();
+
+        let num_states = 1 << qubit_count; // 2 ^ qubit_count
+
+        for state_index in 0..num_states {
+            // Check if the specified qubit in the current state is |1⟩
+            if (state_index >> nth_qubit) & 1 == 1 {
+                let amplitude = self.prob_amplitudes.amplitudes()[state_index];
+                cumulative_prob += amplitude.norm_sqr();
+
+                if rand_num <= cumulative_prob {
+                    self.measured = true;
+                    return true; // Return true for |1⟩
+                }
+            }
+        }
+
+        self.measured = true;
+        false // Return false for |0⟩ (if no |1⟩ state is found)
     }
 }
 
