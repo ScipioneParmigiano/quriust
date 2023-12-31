@@ -104,6 +104,33 @@ impl State{
         let new_amplitudes = gate * ampl;
         self.amplitudes = new_amplitudes.as_slice().to_vec();
     }
+
+    pub fn cnot_gate(&mut self, control_qubit: usize, target_qubit: usize) {
+        assert!(control_qubit > 0 && target_qubit > 0);
+
+        let mut cnot_matrix = DMatrix::<Complex<f64>>::identity(2, 2);
+
+        for i in 1..=self.get_qubit_count() {
+            let gate = if i == control_qubit {
+                DMatrix::<Complex<f64>>::from_row_slice(2, 2, &[
+                    Complex::new(0.0, 0.0), Complex::new(1.0, 0.0),
+                    Complex::new(1.0, 0.0), Complex::new(0.0, 0.0),
+                ])
+            } else if i == target_qubit {
+                DMatrix::<Complex<f64>>::identity(2, 2)
+            } else {
+                DMatrix::<Complex<f64>>::identity(2, 2)
+            };
+
+            cnot_matrix = if i == 1 {
+                gate.clone()
+            } else {
+                kronecker_product(&gate, &cnot_matrix)
+            };
+        }
+
+        self.apply_gate(cnot_matrix);
+    }
 }
 
 
@@ -233,6 +260,28 @@ fn hadamard_test() {
     qr2.h(1);       
     let qr2_state = qr2.state();
     assert_eq!(qr2_state, vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: q, im: 0.0 }, Complex { re: q, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
+}
+
+
+
+
+#[test]
+fn cnot_test() {
+    let cr1 = ClassicalRegister::new(vec![0,0,0,0]);
+    let mut qr1: QuantumRegister = QuantumRegister::new(&cr1);
+    qr1.x(1);
+    qr1.cnot(1, 2);
+    let qr1_state = qr1.state();
+    assert_eq!(qr1_state, vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
+
+
+    let cr2 = ClassicalRegister::new(vec![0,0,0,0,0,0,0,0]);
+    let mut qr2: QuantumRegister = QuantumRegister::new(&cr2);
+    let qr2_state = qr2.state();
+    println!("aa{:?}", qr2_state);
+    qr2.cnot(1, 2);       
+    let qr2_state = qr2.state();
+    assert_eq!(qr2_state, vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
 }
 
 

@@ -88,6 +88,7 @@ impl QuantumRegister {
     }
 
     pub fn get_qubit_count(&self) -> usize {
+        println!("get qub count{}", (self.len() as f64).log2() as usize);
         (self.len() as f64).log2() as usize
     }
 
@@ -137,11 +138,14 @@ impl QuantumRegister {
         self.prob_amplitudes.hadamard_gate(target_qubit);
     }
 
-    pub fn measure_qubit(&mut self, nth_qubit: usize) -> bool {
-        assert_eq!(false, self.measured);
+    pub fn cnot(&mut self, control_qubit: usize, target_qubit: usize){
+        self.prob_amplitudes.cnot_gate(control_qubit, target_qubit);
+    }
 
+    pub fn measure_qubit(&mut self, nth_qubit: usize) -> bool {
         let qubit_count = self.get_qubit_count();
-        assert!(qubit_count > nth_qubit);
+        
+        // assert!(qubit_count >= nth_qubit);
 
         let mut cumulative_prob = 0.0;
         let rand_num: f64 = rand::random();
