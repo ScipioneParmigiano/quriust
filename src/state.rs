@@ -101,35 +101,95 @@ impl State{
     
     fn apply_gate(&mut self, gate: DMatrix<Complex<f64>>){
         let ampl = DVector::<Complex<f64>>::from_iterator(self.amplitudes.len(), self.amplitudes.clone().into_iter());
+
+        // println!("{:?}", gate.shape());
+        // println!("{:?}", ampl.shape());        
+
         let new_amplitudes = gate * ampl;
         self.amplitudes = new_amplitudes.as_slice().to_vec();
     }
 
     pub fn cnot_gate(&mut self, control_qubit: usize, target_qubit: usize) {
-        assert!(control_qubit > 0 && target_qubit > 0);
+        // assert!(control_qubit > 0 && target_qubit > 0);
 
-        let mut cnot_matrix = DMatrix::<Complex<f64>>::identity(2, 2);
+        // let mut cnot_matrix = DMatrix::<Complex<f64>>::identity(2, 2);
 
-        for i in 1..=self.get_qubit_count() {
-            let gate = if i == control_qubit {
+        // for i in 1..=self.get_qubit_count() {
+        //     let gate = if i == control_qubit {
+        //         DMatrix::<Complex<f64>>::from_row_slice(2, 2, &[
+        //             Complex::new(0.0, 0.0), Complex::new(1.0, 0.0),
+        //             Complex::new(1.0, 0.0), Complex::new(0.0, 0.0),
+        //         ])
+        //     } else if i == target_qubit {
+        //         DMatrix::<Complex<f64>>::identity(2, 2)
+        //     } else {
+        //         DMatrix::<Complex<f64>>::identity(2, 2)
+        //     };
+
+        //     cnot_matrix = if i == 1 {
+        //         gate.clone()
+        //     } else {
+        //         kronecker_product(&gate, &cnot_matrix)
+        //     };
+        // }
+
+        // println!("{}", cnot_matrix);
+
+        // self.apply_gate(cnot_matrix);
+        /////
+        let num_qubits = (self.amplitudes.len() as f32).log2() as usize;
+        // assert!(control_qubit > 0 && target_qubit > 0 && control_qubit <= num_qubits && target_qubit <= num_qubits);
+
+        // let mut cnot_gate = DMatrix::<Complex<f64>>::identity(1, 1);
+
+
+        // for i in 1..=num_qubits {
+        //     let gate = if i == control_qubit {
+        //         DMatrix::<Complex<f64>>::from_row_slice(2, 2, &[
+        //             Complex::new(0.0, 0.0), Complex::new(1.0, 0.0),
+        //             Complex::new(1.0, 0.0), Complex::new(0.0, 0.0),
+        //         ])
+        //     } else if i == target_qubit {
+        //         DMatrix::<Complex<f64>>::identity(2, 2)
+        //     } else {
+        //         DMatrix::<Complex<f64>>::identity(2, 2)
+        //     };
+
+        //     cnot_gate = if i == 1 {
+        //         gate.clone()
+        //     } else {
+        //         kronecker_product(&gate, &cnot_gate)
+        //     };
+        // }
+
+        // println!("{}", cnot_gate);
+        // self.apply_gate(cnot_gate);
+        /////
+        assert!(control_qubit > 0 && target_qubit > 0 && control_qubit <= num_qubits && target_qubit <= num_qubits);
+
+    let mut cnot_gate = DMatrix::<Complex<f64>>::identity(1 << num_qubits, 1 << num_qubits);
+
+    for i in 0..(1 << num_qubits) {
+        let bit_i = 1 << i;
+
+        if (i & bit_i) == bit_i {
+            let gate = if i & (1 << (control_qubit - 1)) != 0 && i & (1 << (target_qubit - 1)) == 0 {
+                // Apply CNOT gate
                 DMatrix::<Complex<f64>>::from_row_slice(2, 2, &[
-                    Complex::new(0.0, 0.0), Complex::new(1.0, 0.0),
                     Complex::new(1.0, 0.0), Complex::new(0.0, 0.0),
+                    Complex::new(0.0, 0.0), Complex::new(1.0, 0.0),
                 ])
-            } else if i == target_qubit {
-                DMatrix::<Complex<f64>>::identity(2, 2)
             } else {
+                // Apply identity gate
                 DMatrix::<Complex<f64>>::identity(2, 2)
             };
 
-            cnot_matrix = if i == 1 {
-                gate.clone()
-            } else {
-                kronecker_product(&gate, &cnot_matrix)
-            };
+            cnot_gate = kronecker_product(&cnot_gate, &gate);
         }
+    }
+    
 
-        self.apply_gate(cnot_matrix);
+    self.apply_gate(cnot_gate);
     }
 }
 
@@ -272,7 +332,7 @@ fn cnot_test() {
     qr1.x(1);
     qr1.cnot(1, 2);
     let qr1_state = qr1.state();
-    assert_eq!(qr1_state, vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
+    assert_eq!(qr1_state, vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
 
 
     let cr2 = ClassicalRegister::new(vec![0,0,0,0,0,0,0,0]);
@@ -281,7 +341,7 @@ fn cnot_test() {
     println!("aa{:?}", qr2_state);
     qr2.cnot(1, 2);       
     let qr2_state = qr2.state();
-    assert_eq!(qr2_state, vec![Complex { re: 0.0, im: 0.0 }, Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
+    assert_eq!(qr2_state, vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
 }
 
 
