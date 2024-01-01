@@ -8,7 +8,6 @@ pub struct ClassicalRegister{
 
 impl ClassicalRegister{
     pub fn new(bits: Vec<usize>)-> ClassicalRegister {
-        // check bits are either 0s or 1s
         ClassicalRegister{bits}
     }
 
@@ -88,7 +87,6 @@ impl QuantumRegister {
     }
 
     pub fn get_qubit_count(&self) -> usize {
-        // println!("get qub count{}", (self.len() as f64).log2() as usize);
         (self.len() as f64).log2() as usize
     }
 
@@ -102,8 +100,6 @@ impl QuantumRegister {
         for (val, coefficient) in self.prob_amplitudes.amplitudes().iter().enumerate() {
             let scaled_prob = coefficient.norm_sqr();
             cum += scaled_prob;
-            // println!("cum: {}", cum);
-            // println!("{}", val);
 
             if rand_num <= cum {
                 return ClassicalRegister::from_value(self.len, val as u32);
@@ -145,7 +141,6 @@ impl QuantumRegister {
     pub fn measure_qubit(&mut self, qubit_to_measure: usize) -> bool {
         let measured_classical_register = self.measure(); // Measure all qubits
 
-    println!("qqqq{:?}", measured_classical_register.bits());
 
     let qubit_state_index = measured_classical_register.value() >> (self.len() - qubit_to_measure);
     let qubit_state = (qubit_state_index & 1) != 0;
@@ -210,11 +205,10 @@ fn test_measure_single_qubit(){
     let mut qr2: QuantumRegister = QuantumRegister::init(5);
 
     qr1.x(1); 
-    println!("Probabilities of qr1: {:?}", qr1.state());
 
     let m1 = qr1.measure_qubit(1); 
     let m2 = qr2.measure_qubit(5); 
 
-    assert_eq!(m1, true); // Assert the measurement outcome
-    assert_eq!(m2, false); // Assuming the second qubit is in the |0⟩ state
+    assert_eq!(m1, true); 
+    assert_eq!(m2, false);
 }
