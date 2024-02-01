@@ -7,7 +7,7 @@ Add this library as a dependency in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-quriust = "0.1.4"
+quriust = "0.1.6"
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ println!("Measurement outcome: {:?}", measurement);
 ```
 
 ## Documentation
-For detailed usage instructions and API documentation, see the [documentation](https://docs.rs/quriust/0.1.4/quriust/).
+For detailed usage instructions and API documentation, see the [documentation](https://docs.rs/quriust/0.1.6/quriust/).
 
 ## Contributing
 Quriust welcomes contributions from the community to enhance its features, improve performance, and fix bugs. If you're interested in contributing, feel free to submit pull requests with your improvements.
