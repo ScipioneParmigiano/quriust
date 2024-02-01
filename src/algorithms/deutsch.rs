@@ -1,6 +1,20 @@
 use super::super::registers;
 use registers::*;
 
+/// Executes the Deutsch algorithm using the provided function.
+///
+/// The Deutsch algorithm determines whether a given function is constant or balanced
+/// by evaluating it on a quantum computer.
+///
+/// # Arguments
+///
+/// * `q` - A mutable reference to the quantum register on which the algorithm operates.
+/// * `function` - The function to be evaluated on the quantum register.
+///
+/// # Returns
+///
+/// A boolean indicating whether the provided function is constant (`false`) or balanced (`true`).
+
 pub fn deutsch_algorithm(q: &mut QuantumRegister, function: fn(&mut QuantumRegister)) -> bool {
     // Apply hadamard gate
     for i in 1..=q.len(){

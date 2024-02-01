@@ -3,16 +3,20 @@ use super::registers::{ClassicalRegister, QuantumRegister};
 
 use nalgebra::{DMatrix, DVector};
 
+/// Represents the state of a quantum system, defined by a vector of complex amplitudes
 #[derive(Debug, Clone)]
 pub struct State{
     amplitudes: Vec<Complex<f64>>
 }
 
 impl State{
+     /// Creates a new quantum state with the specified number of amplitudes, initialized to zero
     pub fn new(n: usize)-> State{
         State{amplitudes: vec![Complex{re: 0.0, im: 0.0}; n]}
     }
 
+    /// Creates a quantum state from a classical register with all amplitudes set to zero
+    /// except the amplitude corresponding to the value of the classical register, which is set to one
     pub fn from_cr(cr: &ClassicalRegister) -> State{
         let mut state = State::new(cr.len());
         state.amplitudes[cr.value() as usize] = Complex{re: 1.0, im: 0.0};
@@ -20,14 +24,19 @@ impl State{
         state
     }
 
+    /// Returns the amplitudes of the quantum state    
     pub fn amplitudes(&self) -> Vec<Complex<f64>>{
         self.amplitudes.clone()
     }
 
+    /// Returns the number of qubits represented by the quantum state
     pub fn get_qubit_count(&self) -> usize {
         (self.amplitudes.len() as f64).log2() as usize
     }
 
+    /// Applies the Pauli-X gate (NOT gate) to the specified target qubit.
+    ///
+    /// The Pauli-X gate flips the state of the target qubit
     pub fn pauli_x_gate(&mut self, target_qubit: usize){
         let matr = vec![
             Complex::new(0.0, 0.0), Complex::new(1.0, 0.0),
@@ -39,6 +48,9 @@ impl State{
 
     }
 
+    /// Applies the Pauli-Y gate to the specified target qubit.
+    ///
+    /// The Pauli-Y gate introduces a phase flip if the qubit is in the |1⟩ state
     pub fn pauli_y_gate(&mut self, target_qubit: usize) {
         let matr = vec![
             Complex::new(0.0, 0.0), Complex::new(0.0, -1.0),
@@ -50,6 +62,9 @@ impl State{
 
     }
 
+    /// Applies the Pauli-Z gate to the specified target qubit.
+    ///
+    /// The Pauli-Z gate introduces a phase flip if the qubit is in the |1⟩ state  
     pub fn pauli_z_gate(&mut self, target_qubit: usize) {
         let matr = vec![
             Complex::new(1.0, 0.0), Complex::new(0.0, 0.0),
@@ -60,6 +75,9 @@ impl State{
         self.apply_gate_to_qubit(pauli_z_matrix, target_qubit);
     }  
 
+    /// Applies the Hadamard gate to the specified target qubit.
+    ///
+    /// The Hadamard gate creates superposition by putting the qubit in a state of equal probability of |0⟩ and |1⟩
     pub fn hadamard_gate(&mut self, target_qubit: usize) {
         let q = 1.0 / (2.0 as f64).sqrt();
         let matr = vec![
@@ -73,32 +91,37 @@ impl State{
         self.apply_gate_to_qubit(hadamard_matrix, target_qubit);
     }
     
-    fn apply_gate_to_qubit(&mut self, gate: DMatrix<Complex<f64>>, target_qubit: usize) {
+    /// Applies a quantum gate to the specified target qubit.
+    ///
+    /// This method applies the given gate to the target qubit using the Kronecker product method. Note that you can use this
+    /// method also for user-defined gates
+    pub fn apply_gate_to_qubit(&mut self, gate: DMatrix<Complex<f64>>, target_qubit: usize) {
         let qubit_count = self.get_qubit_count();
         assert!(qubit_count >= target_qubit);
         assert!(target_qubit!=0);
 
-    let mut full_gate = DMatrix::identity(2, 2);
+        let mut full_gate = DMatrix::identity(2, 2);
 
-    for i in 1..=qubit_count {
-        let current_gate = if i == target_qubit {
-            gate.clone() // Apply the provided gate if the current qubit is the target qubit
-        } else {
-            DMatrix::identity(2, 2) // Identity gate for other qubits
-        };
+        for i in 1..=qubit_count {
+            let current_gate = if i == target_qubit {
+                gate.clone() // Apply the provided gate if the current qubit is the target qubit
+            } else {
+                DMatrix::identity(2, 2) // Identity gate for other qubits
+            };
 
-        full_gate = if i == 1 {
-            current_gate.clone() // Assign the gate to the first qubit directly
-        } else {
-            kronecker_product(&current_gate, &full_gate) // Apply Kronecker product for subsequent qubits
-        };
-    }
+            full_gate = if i == 1 {
+                current_gate.clone() // Assign the gate to the first qubit directly
+            } else {
+                kronecker_product(&current_gate, &full_gate) // Apply Kronecker product for subsequent qubits
+            };
+        }
 
-    self.apply_gate(full_gate);
-
-
+        self.apply_gate(full_gate);
     } 
     
+    /// Applies a quantum gate to the entire quantum state.
+    ///
+    /// This method applies the given gate to the entire quantum state vector
     fn apply_gate(&mut self, gate: DMatrix<Complex<f64>>){
         let ampl = DVector::<Complex<f64>>::from_iterator(self.amplitudes.len(), self.amplitudes.clone().into_iter());
 
@@ -106,6 +129,9 @@ impl State{
         self.amplitudes = new_amplitudes.as_slice().to_vec();
     }
 
+    /// Applies the Controlled-NOT (CNOT) gate to the specified control and target qubits.
+    ///
+    /// The CNOT gate flips the target qubit if and only if the control qubit is in the |1⟩ state
     pub fn cnot_gate(&mut self, control_qubit: usize, target_qubit: usize) {
         let num_qubits = (self.amplitudes.len() as f32).log2() as usize;
         assert!(control_qubit > 0 && target_qubit > 0 && control_qubit <= num_qubits && target_qubit <= num_qubits);
@@ -136,7 +162,7 @@ impl State{
     }
 }
 
-
+/// Calculates the Kronecker product of two matrices
 pub fn kronecker_product(a: &DMatrix<Complex<f64>>, b: &DMatrix<Complex<f64>>) -> DMatrix<Complex<f64>> {
     let mut result = DMatrix::zeros(a.nrows() * b.nrows(), a.ncols() * b.ncols());
 
@@ -155,7 +181,6 @@ pub fn kronecker_product(a: &DMatrix<Complex<f64>>, b: &DMatrix<Complex<f64>>) -
 
     result
 }
-
 
 
 #[test]
@@ -285,5 +310,3 @@ fn cnot_test() {
     let qr2_state = qr2.state();
     assert_eq!(qr2_state, vec![Complex { re: 1.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }, Complex { re: 0.0, im: 0.0 }]);
 }
-
-
