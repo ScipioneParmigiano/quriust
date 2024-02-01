@@ -64,7 +64,7 @@ impl State{
 
     /// Applies the Pauli-Z gate to the specified target qubit.
     ///
-    /// The Pauli-Z gate introduces a phase flip if the qubit is in the |1⟩ state  
+    /// The Pauli-Z gate introduces a phase flip iif the qubit is in the |1⟩ state  
     pub fn pauli_z_gate(&mut self, target_qubit: usize) {
         let matr = vec![
             Complex::new(1.0, 0.0), Complex::new(0.0, 0.0),
