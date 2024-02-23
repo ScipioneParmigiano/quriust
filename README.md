@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="https://img.shields.io/crates/d/quriust.svg" alt="Downloads">
+   <img src="https://img.shields.io/crates/v/quriust.svg" alt="Version">
+</div>
+
 # Quriust
 Just a quantum computing simulator in Rust for courious ones, built to run and learn some simple algorithms. 
 
